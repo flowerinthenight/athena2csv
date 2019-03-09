@@ -7,12 +7,12 @@ $ go get -u -v github.com/flowerinthenight/athena2csv
 ```
 Or you can clone and build.
 ```bash
-# $ git clone https://github.com/flowerinthenight/athena2csv
+$ git clone https://github.com/flowerinthenight/athena2csv
 $ cd athena2csv/
 $ go build -v
 ```
 
-### Run the tool
+## Run the tool
 ```bash
 # Required environment variables:
 # The following should have at least Athena read and S3 read/write access.
