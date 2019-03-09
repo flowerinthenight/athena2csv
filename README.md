@@ -22,7 +22,7 @@ AWS_ACCESS_KEY_ID={aws-key-id}
 AWS_SECRET_ACCESS_KEY={aws-secret}
 ```
 
-If your query string is quite long, you can write it in a file, like the example file `query.txt` provided in this repo. Then run the following command:
+If your query string is quite long, you can write it in a file:
 ```bash
 $ ./athena2csv --database aws-billing --query-file query.txt
 ```
