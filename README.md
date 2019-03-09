@@ -5,7 +5,7 @@ This tool can download an [Athena](https://aws.amazon.com/athena/) SQL query res
 ```bash
 $ go get -u -v github.com/flowerinthenight/athena2csv
 ```
-Or you can clone and build.
+Or you can clone and build:
 ```bash
 $ git clone https://github.com/flowerinthenight/athena2csv
 $ cd athena2csv/
