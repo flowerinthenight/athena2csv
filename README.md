@@ -1,9 +1,11 @@
 ## Overview
 This tool can download an [Athena](https://aws.amazon.com/athena/) SQL query results in CSV format.
 
-## How to use
+## Installation
+```bash
+$ go get -u -v github.com/flowerinthenight/athena2csv
+```
 
-### Build the tool
 ```bash
 # You need to have a Go build environment. After cloning, run:
 $ cd cmd/queryathena2csv/
