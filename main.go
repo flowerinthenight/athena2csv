@@ -2,6 +2,7 @@ package main
 
 import (
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,8 +15,6 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/cenkalti/backoff"
-	"github.com/mobingi/gosdk/pkg/util/cmdline"
-	"github.com/mobingi/gosdk/pkg/util/simplelog"
 	"github.com/spf13/cobra"
 )
 
@@ -25,13 +24,13 @@ var (
 	queryFile   string
 
 	rootCmd = &cobra.Command{
-		Use:   "queryathena2csv [query]",
+		Use:   "athena2csv [query]",
 		Short: "execute athena query and download csv result",
 		Run: func(cmd *cobra.Command, args []string) {
 			if queryFile != "" {
 				b, err := ioutil.ReadFile(queryFile)
 				if err != nil {
-					die(err)
+					log.Fatalln(err)
 				}
 
 				do(string(b))
@@ -39,7 +38,7 @@ var (
 			}
 
 			if len(args) == 0 {
-				die("no input query")
+				log.Fatalln("no input query")
 			}
 
 			do(args[0])
@@ -47,14 +46,28 @@ var (
 	}
 )
 
-func do(query string) {
-	if database == "" {
-		die("database is empty")
+func dir() string {
+	name, err := os.Executable()
+	if err != nil {
+		return filepath.Dir(os.Args[0])
 	}
 
-	simplelog.Infof("query=%v", query)
-	simplelog.Infof("dir=%v", cmdline.Dir())
-	simplelog.Infof("qb=%v", queryBucket)
+	link, err := filepath.EvalSymlinks(name)
+	if err != nil {
+		return filepath.Dir(name)
+	}
+
+	return filepath.Dir(link)
+}
+
+func do(query string) {
+	if database == "" {
+		log.Fatalln("database is empty")
+	}
+
+	log.Printf("query=%v", query)
+	log.Printf("dir=%v", dir())
+	log.Printf("qb=%v", queryBucket)
 
 	sess, _ := session.NewSession(&aws.Config{
 		Region: aws.String(os.Getenv("AWS_REGION")),
@@ -81,7 +94,7 @@ func do(query string) {
 	op := func() error {
 		tries += 1
 		if tries > 1 {
-			simplelog.Infof("StartQueryExecution throttled, retry call %v after first run", time.Since(start))
+			log.Printf("StartQueryExecution throttled, retry call %v after first run", time.Since(start))
 		}
 
 		result, err = svc.StartQueryExecution(&s)
@@ -97,16 +110,16 @@ func do(query string) {
 
 	err = backoff.Retry(op, backoff.NewExponentialBackOff())
 	if err != nil {
-		dief("StartQueryExecution failed, retry exhausted, err=%v", err)
+		log.Fatalf("StartQueryExecution failed, retry exhausted, err=%v", err)
 	} else {
 		err = rerr
 	}
 
 	if err != nil {
-		dief("StartQueryExecution failed, err=%v", err)
+		log.Fatalf("StartQueryExecution failed, err=%v", err)
 	}
 
-	simplelog.Infof("StartQueryExecution result=%v", result.GoString())
+	log.Printf("StartQueryExecution result=%v", result.GoString())
 
 	var qri athena.GetQueryExecutionInput
 	qri.SetQueryExecutionId(*result.QueryExecutionId)
@@ -122,7 +135,7 @@ func do(query string) {
 		op := func() error {
 			tries += 1
 			if tries > 1 {
-				simplelog.Infof("GetQueryExecution throttled, retry call %v after first run", time.Since(start))
+				log.Printf("GetQueryExecution throttled, retry call %v after first run", time.Since(start))
 			}
 
 			qrop, err = svc.GetQueryExecution(&qri)
@@ -138,20 +151,20 @@ func do(query string) {
 
 		err = backoff.Retry(op, backoff.NewExponentialBackOff())
 		if err != nil {
-			dief("GetQueryExecution failed, retry exhausted, err=%v", err)
+			log.Fatalf("GetQueryExecution failed, retry exhausted, err=%v", err)
 		} else {
 			err = rerr
 		}
 
 		if err != nil {
-			dief("GetQueryExecution failed, err=%v", err)
+			log.Fatalf("GetQueryExecution failed, err=%v", err)
 		}
 
 		if *qrop.QueryExecution.Status.State != "RUNNING" {
 			break
 		}
 
-		simplelog.Infof("waiting state to finish %v since start, current=%v", time.Since(start), *qrop.QueryExecution.Status.State)
+		log.Printf("waiting state to finish %v since start, current=%v", time.Since(start), *qrop.QueryExecution.Status.State)
 
 		if time.Since(start) > (time.Hour * 1) {
 			less1h = false
@@ -162,21 +175,21 @@ func do(query string) {
 	}
 
 	if !less1h {
-		dief("query has gone beyond 1hour!")
+		log.Fatalf("query has gone beyond 1hour!")
 	}
 
 	if *qrop.QueryExecution.Status.State == "SUCCEEDED" {
 		srcFile := queryBucket + "/" + *result.QueryExecutionId + ".csv"
-		simplelog.Infof("output=s3://%v", srcFile)
+		log.Printf("output=s3://%v", srcFile)
 
 		downloader := s3manager.NewDownloader(session.New(&aws.Config{
 			Region: aws.String(os.Getenv("AWS_REGION")),
 		}))
 
-		toDownload := filepath.Join(cmdline.Dir(), "output.csv")
+		toDownload := filepath.Join(dir(), "output.csv")
 		file, err := os.Create(toDownload)
 		if err != nil {
-			die(err)
+			log.Fatalln(err)
 		}
 
 		defer file.Close()
@@ -187,14 +200,14 @@ func do(query string) {
 			})
 
 		if err != nil {
-			die(err)
+			log.Fatalln(err)
 		}
 
-		simplelog.Infof("downloaded=%v, bytes=%v", file.Name(), numBytes)
+		log.Printf("downloaded=%v, bytes=%v", file.Name(), numBytes)
 		return
 	}
 
-	dief("unexpected state, val=%v, details=%v",
+	log.Fatalf("unexpected state, val=%v, details=%v",
 		*qrop.QueryExecution.Status.State,
 		*qrop.QueryExecution.Status.StateChangeReason)
 }
@@ -218,21 +231,11 @@ func isAthenaThrottleErr(err error) bool {
 	return false
 }
 
-func die(v ...interface{}) {
-	simplelog.Error(v...)
-	os.Exit(1)
-}
-
-func dief(f string, v ...interface{}) {
-	simplelog.Errorf(f, v...)
-	os.Exit(1)
-}
-
 func main() {
 	rootCmd.PersistentFlags().StringVar(&queryBucket, "query-bucket", queryBucket, "bucket to save queries")
 	rootCmd.PersistentFlags().StringVar(&queryFile, "query-file", queryFile, "filename containing your query, high priority than args")
 	rootCmd.PersistentFlags().StringVar(&database, "database", database, "athena database to query from")
 	if err := rootCmd.Execute(); err != nil {
-		die("root cmd execute failed: %v", err)
+		log.Fatalln("root cmd execute failed: %v", err)
 	}
 }
