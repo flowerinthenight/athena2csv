@@ -1,3 +1,5 @@
+[![CircleCI](https://circleci.com/gh/flowerinthenight/athena2csv/tree/master.svg?style=svg)](https://circleci.com/gh/flowerinthenight/athena2csv/tree/master)
+
 ## Overview
 This tool can download an [Athena](https://aws.amazon.com/athena/) SQL query results in CSV format.
 
