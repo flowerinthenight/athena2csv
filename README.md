@@ -5,10 +5,10 @@ This tool can download an [Athena](https://aws.amazon.com/athena/) SQL query res
 ```bash
 $ go get -u -v github.com/flowerinthenight/athena2csv
 ```
-
+Or you can clone and build.
 ```bash
-# You need to have a Go build environment. After cloning, run:
-$ cd cmd/queryathena2csv/
+# $ git clone https://github.com/flowerinthenight/athena2csv
+$ cd athena2csv/
 $ go build -v
 ```
 
