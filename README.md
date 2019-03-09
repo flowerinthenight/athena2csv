@@ -1,5 +1,5 @@
 ## Overview
-This tool can download an Athena SQL query results in CSV form.
+This tool can download an [Athena](https://aws.amazon.com/athena/) SQL query results in CSV form.
 
 ## How to use
 
