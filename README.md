@@ -15,6 +15,8 @@ $ go build -v
 ```
 
 ## Run the tool
+Running this tool will create an [S3 bucket](https://aws.amazon.com/s3/) `queryathena2csv-query-bucket`.
+
 Required environment variables:
 
 ```bash
