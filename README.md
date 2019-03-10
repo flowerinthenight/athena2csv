@@ -28,12 +28,12 @@ AWS_SECRET_ACCESS_KEY={aws-secret}
 
 If your query string is quite long, you can write it in a file:
 ```bash
-$ ./athena2csv --database aws-billing --query-file query.txt
+$ athena2csv --database aws-billing --query-file query.txt
 ```
 
 If your query is not that long, you can input directly in command line:
 ```bash
-$ ./athena2csv --database aws-billing "select \"identity/lineitemid\" \
+$ athena2csv --database aws-billing "select \"identity/lineitemid\" \
       from \"aws_billing\".\"mobingilabs_aws_billing_formatted_development\" \
       limit 10"
 ```
