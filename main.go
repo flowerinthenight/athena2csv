@@ -26,6 +26,7 @@ var (
 	rootCmd = &cobra.Command{
 		Use:   "athena2csv [query]",
 		Short: "execute athena query and download csv result",
+		Long:  "Execute athena query and download csv result.",
 		Run: func(cmd *cobra.Command, args []string) {
 			if queryFile != "" {
 				b, err := ioutil.ReadFile(queryFile)
