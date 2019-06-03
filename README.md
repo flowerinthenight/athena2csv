@@ -4,14 +4,15 @@
 This tool can download an [Athena](https://aws.amazon.com/athena/) SQL query results in CSV format.
 
 ## Installation
+Using [Homebrew](https://brew.sh/):
+```bash
+$ brew tap flowerinthenight/tap
+$ brew install athena2csv
+```
+
+If you have a Go environment:
 ```bash
 $ go get -u -v github.com/flowerinthenight/athena2csv
-```
-Or you can clone and build:
-```bash
-$ git clone https://github.com/flowerinthenight/athena2csv
-$ cd athena2csv/
-$ go build -v
 ```
 
 ## Run the tool
