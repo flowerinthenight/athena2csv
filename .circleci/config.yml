@@ -10,4 +10,4 @@ jobs:
         name: build
         shell: /bin/bash
         command: |
-          GO111MODULE=on go build -v
+          GO111MODULE=on GOFLAGS=-mod=vendor go build -v
