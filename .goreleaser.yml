@@ -1,0 +1,33 @@
+builds:
+- id: "athena2csv"
+  binary: athena2csv
+  goos:
+  - linux
+  - darwin
+  goarch:
+  - amd64
+checksum:
+  name_template: 'checksums.txt'
+dist: /tmp/athena2csv/dist
+changelog:
+  sort: asc
+  filters:
+    exclude:
+    - '^docs:'
+    - '^test:'
+release:
+  github:
+    owner: flowerinthenight
+    name: athena2csv
+brews:
+- tap:
+    owner: flowerinthenight
+    name: homebrew-tap
+  name: athena2csv
+  homepage: "https://github.com/flowerinthenight/athena2csv"
+  description: "Execute athena query and download csv result."
+  folder: Formula
+  install: |
+    bin.install "athena2csv"
+  test: |
+    assert_match /Execute athena query and download csv result/, shell_output("#{bin}/athena2csv -h", 0)
